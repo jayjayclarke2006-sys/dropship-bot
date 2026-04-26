@@ -1,9 +1,22 @@
-import random
+import requests
 
 def get_supplier_products():
-    return [
-        {"name": "Wireless Earbuds", "supplier_price": random.randint(8, 15)},
-        {"name": "Phone Holder", "supplier_price": random.randint(2, 6)},
-        {"name": "LED Strip Lights", "supplier_price": random.randint(5, 10)},
-        {"name": "Bluetooth Speaker", "supplier_price": random.randint(10, 20)},
-    ]
+    url = "https://fakestoreapi.com/products"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        products = []
+
+        for item in data[:5]:  # limit to 5 products
+            products.append({
+                "name": item["title"],
+                "supplier_price": float(item["price"])
+            })
+
+        return products
+
+    except Exception as e:
+        print("Error fetching supplier data:", e)
+        return []
