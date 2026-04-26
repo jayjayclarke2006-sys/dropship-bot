@@ -1,6 +1,7 @@
-from app.db import init_db
-from app.scheduler import start_scheduler
+from fastapi import FastAPI
 
-if __name__ == "__main__":
-    init_db()
-    start_scheduler()
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"status": "running"}
