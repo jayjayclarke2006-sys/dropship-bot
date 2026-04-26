@@ -9,10 +9,11 @@ def get_supplier_products():
 
         products = []
 
-        for item in data[:5]:  # limit to 5 products
+        for item in data[:10]:  # limit to 10 products
             products.append({
                 "name": item["title"],
-                "supplier_price": float(item["price"])
+                "supplier_price": float(item["price"]),
+                "niche": item["category"]
             })
 
         return products
