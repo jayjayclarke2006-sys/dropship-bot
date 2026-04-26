@@ -1,14 +1,22 @@
-def find_products():
-    supplier_products = [
-        {"name": "Wireless Earbuds", "supplier_price": 12},
-        {"name": "Phone Holder", "supplier_price": 3},
-        {"name": "LED Strip Lights", "supplier_price": 8}
+import random
+
+def get_supplier_products():
+    return [
+        {"name": "Wireless Earbuds", "supplier_price": random.randint(8, 15)},
+        {"name": "Phone Holder", "supplier_price": random.randint(2, 6)},
+        {"name": "LED Strip Lights", "supplier_price": random.randint(5, 10)},
+        {"name": "Bluetooth Speaker", "supplier_price": random.randint(10, 20)},
     ]
+
+
+def find_products():
+    supplier_products = get_supplier_products()
 
     amazon_prices = {
         "Wireless Earbuds": 29.99,
         "Phone Holder": 14.99,
-        "LED Strip Lights": 25.99
+        "LED Strip Lights": 25.99,
+        "Bluetooth Speaker": 39.99
     }
 
     profitable = []
