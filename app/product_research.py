@@ -1,29 +1,28 @@
 def find_products():
-    products = [
-        {
-            "name": "Wireless Earbuds",
-            "price": 12,
-            "amazon_price": 29.99
-        },
-        {
-            "name": "Phone Holder",
-            "price": 3,
-            "amazon_price": 14.99
-        },
-        {
-            "name": "Bad Product",
-            "price": 20,
-            "amazon_price": 22
-        }
+    supplier_products = [
+        {"name": "Wireless Earbuds", "supplier_price": 12},
+        {"name": "Phone Holder", "supplier_price": 3},
+        {"name": "LED Strip Lights", "supplier_price": 8}
     ]
+
+    amazon_prices = {
+        "Wireless Earbuds": 29.99,
+        "Phone Holder": 14.99,
+        "LED Strip Lights": 25.99
+    }
 
     profitable = []
 
-    for p in products:
-        profit = p["amazon_price"] - p["price"]
+    for p in supplier_products:
+        amazon_price = amazon_prices.get(p["name"], 0)
+        profit = amazon_price - p["supplier_price"]
 
         if profit > 10:
-            p["profit"] = round(profit, 2)
-            profitable.append(p)
+            profitable.append({
+                "name": p["name"],
+                "supplier_price": p["supplier_price"],
+                "amazon_price": amazon_price,
+                "profit": round(profit, 2)
+            })
 
     return profitable
