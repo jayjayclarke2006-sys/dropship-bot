@@ -4,3 +4,4 @@ sqlalchemy==1.4.49
 pydantic==1.10.13
 requests
 python-dotenv
+schedule
