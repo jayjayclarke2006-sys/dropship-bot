@@ -1,19 +1,17 @@
 from app.supplier import get_supplier_products
+import random
+
+def estimate_amazon_price(supplier_price):
+    return round(supplier_price * random.uniform(2.5, 4.5), 2)
+
 
 def find_products():
     supplier_products = get_supplier_products()
 
-    amazon_prices = {
-        "Wireless Earbuds": 29.99,
-        "Phone Holder": 14.99,
-        "LED Strip Lights": 25.99,
-        "Bluetooth Speaker": 39.99
-    }
-
     profitable = []
 
     for p in supplier_products:
-        amazon_price = amazon_prices.get(p["name"], 0)
+        amazon_price = estimate_amazon_price(p["supplier_price"])
         profit = amazon_price - p["supplier_price"]
 
         if profit > 10:
