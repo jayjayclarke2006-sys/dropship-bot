@@ -4,16 +4,11 @@ from app.listing_generator import generate_listing
 
 app = FastAPI()
 
-# -------------------------------
-# Health Check
-# -------------------------------
 @app.get("/")
 def home():
     return {"status": "running"}
 
-# -------------------------------
-# Scan Products
-# -------------------------------
+
 @app.get("/scan-products")
 def scan_products():
     results = find_products()
@@ -24,9 +19,27 @@ def scan_products():
         "products": results
     }
 
-# -------------------------------
-# Generate Listing
-# -------------------------------
+
+@app.get("/best-product")
+def best_product():
+    products = find_products()
+
+    if not products:
+        return {
+            "status": "no products found",
+            "message": "No winning products found right now. Try scanning again."
+        }
+
+    best = max(products, key=lambda p: p.get("score", 0))
+    listing = generate_listing(best)
+
+    return {
+        "status": "success",
+        "best_product": best,
+        "listing": listing
+    }
+
+
 @app.get("/generate-listing")
 def generate_product_listing():
     products = find_products()
@@ -34,12 +47,11 @@ def generate_product_listing():
     if not products:
         return {"status": "no products found"}
 
-    product = products[0]  # take best product
-
-    listing = generate_listing(product)
+    best = max(products, key=lambda p: p.get("score", 0))
+    listing = generate_listing(best)
 
     return {
         "status": "success",
-        "product": product,
+        "product": best,
         "listing": listing
     }
