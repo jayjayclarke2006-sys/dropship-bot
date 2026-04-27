@@ -1,5 +1,30 @@
+from fastapi import FastAPI
+from app.product_research import find_products
+from app.listing_generator import generate_listing
 from app.telegram_bot import send_telegram_message
+import time
+import threading
 
+# ✅ THIS MUST EXIST
+app = FastAPI()
+
+
+@app.get("/")
+def home():
+    return {"status": "running"}
+
+
+@app.get("/scan-products")
+def scan_products():
+    products = find_products()
+    return {
+        "status": "success",
+        "products_found": len(products),
+        "products": products
+    }
+
+
+# 🔥 BOT LOOP
 def run_bot():
     while True:
         print("🔍 Scanning for products...")
@@ -25,12 +50,11 @@ def run_bot():
 📈 Trend: {best['trend_score']}
 ⚠️ Risk: {best['risk']}
 
-🛒 PRICE: ${best['amazon_price']}
+🛒 Price: ${best['amazon_price']}
 
 -----------------------
 
 📝 LISTING:
-
 {listing['title']}
 
 {listing['description']}
@@ -39,3 +63,7 @@ def run_bot():
 
         print("⏳ Waiting 10 minutes...\n")
         time.sleep(600)
+
+
+# ✅ START BACKGROUND BOT
+threading.Thread(target=run_bot).start()
