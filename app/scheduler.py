@@ -1,14 +1,18 @@
-import schedule
 import time
-from app.config import settings
-from app.jobs import run_all_jobs
+from app.product_research import find_products
 
-def start_scheduler():
-    print("Starting automation scheduler...")
-    run_all_jobs()
-
-    schedule.every(settings.check_interval_minutes).minutes.do(run_all_jobs)
-
+def run_bot():
     while True:
-        schedule.run_pending()
-        time.sleep(5)
+        print("🔍 Scanning for products...")
+
+        products = find_products()
+
+        if products:
+            best = products[0]
+            print("🔥 BEST PRODUCT FOUND:")
+            print(best)
+        else:
+            print("❌ No good products found")
+
+        print("⏳ Waiting 10 minutes...\n")
+        time.sleep(600)  # runs every 10 mins
