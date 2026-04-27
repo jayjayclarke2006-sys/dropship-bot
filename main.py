@@ -5,58 +5,40 @@ import time
 
 app = FastAPI()
 
-
-# ✅ Health check
 @app.get("/")
 def home():
     return {"status": "running"}
 
-
-# 🔥 Scan products endpoint
 @app.get("/scan-products")
 def scan_products():
-    data = find_products()
-    best = data["best_product"]
-
-    if not best:
-        return {"status": "no products found"}
-
-    listing = generate_listing(best)
-
+    products = find_products()
     return {
         "status": "success",
-        "best_product": best,
-        "listing": listing
+        "products_found": len(products),
+        "products": products
     }
 
 
-# 🔥 Background bot loop
+# 🔥 AUTO ENGINE LOOP
 def run_bot():
     while True:
-        print("\n🔍 Scanning for products...\n")
+        print("🔍 Scanning for products...")
 
-        data = find_products()
-        best = data["best_product"]
+        products = find_products()
 
-        if best:
-            print("🔥 BEST PRODUCT FOUND:")
-            print(best)
+        if not products:
+            print("❌ No good products found")
+        else:
+            best = products[0]
+            print("🔥 BEST PRODUCT FOUND:", best)
 
             listing = generate_listing(best)
+            print("📦 GENERATED LISTING:", listing)
 
-            print("\n📝 GENERATED LISTING:")
-            print(listing)
-
-        else:
-            print("❌ No good products found")
-
-        print("\n⏳ Waiting 10 minutes...\n")
+        print("⏳ Waiting 10 minutes...\n")
         time.sleep(600)
 
 
-# 🚀 Start bot when server starts
-@app.on_event("startup")
-def startup_event():
-    import threading
-    thread = threading.Thread(target=run_bot)
-    thread.start()
+# Run in background
+import threading
+threading.Thread(target=run_bot).start()
