@@ -1,18 +1,22 @@
 from fastapi import FastAPI
 from app.product_research import find_products
 from app.listing_generator import generate_listing
+import threading
+from app.scheduler import run_bot
 
 app = FastAPI()
 
+
+# ✅ Home route
 @app.get("/")
 def home():
     return {"status": "running"}
 
 
+# ✅ Scan products
 @app.get("/scan-products")
 def scan_products():
     results = find_products()
-
     return {
         "status": "success",
         "products_found": len(results),
@@ -20,34 +24,15 @@ def scan_products():
     }
 
 
+# ✅ Get best product + listing
 @app.get("/best-product")
 def best_product():
     products = find_products()
 
     if not products:
-        return {
-            "status": "no products found",
-            "message": "No winning products found right now. Try scanning again."
-        }
-
-    best = max(products, key=lambda p: p.get("score", 0))
-    listing = generate_listing(best)
-
-    return {
-        "status": "success",
-        "best_product": best,
-        "listing": listing
-    }
-
-
-@app.get("/generate-listing")
-def generate_product_listing():
-    products = find_products()
-
-    if not products:
         return {"status": "no products found"}
 
-    best = max(products, key=lambda p: p.get("score", 0))
+    best = products[0]
     listing = generate_listing(best)
 
     return {
@@ -55,3 +40,7 @@ def generate_product_listing():
         "product": best,
         "listing": listing
     }
+
+
+# ✅ Start automation bot (background)
+threading.Thread(target=run_bot, daemon=True).start()
