@@ -1,11 +1,17 @@
 import requests
 import os
 
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+def get_config():
+    return (
+        os.getenv("TELEGRAM_BOT_TOKEN"),
+        os.getenv("TELEGRAM_CHAT_ID")
+    )
 
 
 def send_telegram_message(text):
+    BOT_TOKEN, CHAT_ID = get_config()
+
     if not BOT_TOKEN or not CHAT_ID:
         print("⚠️ Telegram not configured")
         return
@@ -22,6 +28,8 @@ def send_telegram_message(text):
 
 
 def send_telegram_photo(image_url, caption):
+    BOT_TOKEN, CHAT_ID = get_config()
+
     if not BOT_TOKEN or not CHAT_ID:
         print("⚠️ Telegram not configured")
         return
