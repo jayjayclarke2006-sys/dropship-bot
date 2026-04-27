@@ -1,46 +1,62 @@
 from fastapi import FastAPI
 from app.product_research import find_products
 from app.listing_generator import generate_listing
-import threading
-from app.scheduler import run_bot
+import time
 
 app = FastAPI()
 
 
-# ✅ Home route
+# ✅ Health check
 @app.get("/")
 def home():
     return {"status": "running"}
 
 
-# ✅ Scan products
+# 🔥 Scan products endpoint
 @app.get("/scan-products")
 def scan_products():
-    results = find_products()
-    return {
-        "status": "success",
-        "products_found": len(results),
-        "products": results
-    }
+    data = find_products()
+    best = data["best_product"]
 
-
-# ✅ Get best product + listing
-@app.get("/best-product")
-def best_product():
-    products = find_products()
-
-    if not products:
+    if not best:
         return {"status": "no products found"}
 
-    best = products[0]
     listing = generate_listing(best)
 
     return {
         "status": "success",
-        "product": best,
+        "best_product": best,
         "listing": listing
     }
 
 
-# ✅ Start automation bot (background)
-threading.Thread(target=run_bot, daemon=True).start()
+# 🔥 Background bot loop
+def run_bot():
+    while True:
+        print("\n🔍 Scanning for products...\n")
+
+        data = find_products()
+        best = data["best_product"]
+
+        if best:
+            print("🔥 BEST PRODUCT FOUND:")
+            print(best)
+
+            listing = generate_listing(best)
+
+            print("\n📝 GENERATED LISTING:")
+            print(listing)
+
+        else:
+            print("❌ No good products found")
+
+        print("\n⏳ Waiting 10 minutes...\n")
+        time.sleep(600)
+
+
+# 🚀 Start bot when server starts
+@app.on_event("startup")
+def startup_event():
+    import threading
+    thread = threading.Thread(target=run_bot)
+    thread.start()
