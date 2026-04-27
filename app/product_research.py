@@ -1,5 +1,4 @@
 from app.supplier import get_supplier_products
-from app.amazon import get_amazon_product_data
 from app.pricing import calculate_price, analyze_risk
 import random
 
