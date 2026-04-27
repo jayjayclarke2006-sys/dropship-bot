@@ -60,7 +60,8 @@ def find_products():
             "trend_score": round(trend_score, 2),
             "score": score,
             "niche": p["niche"],
-            "risk": risk
-        })
+            "risk": risk,
+            "image": f"https://source.unsplash.com/600x400/?{p['name'].replace(' ', '%20')}"
+})
 
     return sorted(results, key=lambda x: x["score"], reverse=True)
