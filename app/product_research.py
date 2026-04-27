@@ -16,7 +16,7 @@ def find_products():
         amazon_price = amazon_prices.get(p["name"], 0)
         profit = amazon_price - p["supplier_price"]
 
-        if profit > 10:
+        if profit > 5:
             profitable.append({
                 "name": p["name"],
                 "supplier_price": p["supplier_price"],
