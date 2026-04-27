@@ -14,10 +14,25 @@ def send_telegram_message(text):
 
     payload = {
         "chat_id": CHAT_ID,
-        "text": text
+        "text": text,
+        "parse_mode": "HTML"
     }
 
-    try:
-        requests.post(url, json=payload)
-    except Exception as e:
-        print("Telegram error:", e)
+    requests.post(url, json=payload)
+
+
+def send_telegram_photo(image_url, caption):
+    if not BOT_TOKEN or not CHAT_ID:
+        print("⚠️ Telegram not configured")
+        return
+
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
+
+    payload = {
+        "chat_id": CHAT_ID,
+        "photo": image_url,
+        "caption": caption,
+        "parse_mode": "HTML"
+    }
+
+    requests.post(url, json=payload)
