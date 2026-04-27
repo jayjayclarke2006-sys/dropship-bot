@@ -1,50 +1,43 @@
 import os
-
-print("DEBUG TOKEN:", os.getenv("TELEGRAM_BOT_TOKEN"))
-print("DEBUG CHAT:", os.getenv("TELEGRAM_CHAT_ID"))
 import requests
-import os
 
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-def get_config():
-    return (
-        os.getenv("TELEGRAM_BOT_TOKEN"),
-        os.getenv("TELEGRAM_CHAT_ID")
-    )
+print("DEBUG TOKEN:", TELEGRAM_TOKEN)
+print("DEBUG CHAT:", CHAT_ID)
 
 
 def send_telegram_message(text):
-    BOT_TOKEN, CHAT_ID = get_config()
-
-    if not BOT_TOKEN or not CHAT_ID:
-        print("⚠️ Telegram not configured")
+    if not TELEGRAM_TOKEN or not CHAT_ID:
+        print("❌ Telegram not configured")
         return
 
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
-    payload = {
+    data = {
         "chat_id": CHAT_ID,
         "text": text,
-        "parse_mode": "HTML"
+        "parse_mode": "Markdown"
     }
 
-    requests.post(url, json=payload)
+    response = requests.post(url, data=data)
+    print("📤 Telegram response:", response.text)
 
 
 def send_telegram_photo(image_url, caption):
-    BOT_TOKEN, CHAT_ID = get_config()
-
-    if not BOT_TOKEN or not CHAT_ID:
-        print("⚠️ Telegram not configured")
+    if not TELEGRAM_TOKEN or not CHAT_ID:
+        print("❌ Telegram not configured")
         return
 
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto"
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto"
 
-    payload = {
+    data = {
         "chat_id": CHAT_ID,
         "photo": image_url,
         "caption": caption,
-        "parse_mode": "HTML"
+        "parse_mode": "Markdown"
     }
 
-    requests.post(url, json=payload)
+    response = requests.post(url, data=data)
+    print("📤 Photo response:", response.text)
