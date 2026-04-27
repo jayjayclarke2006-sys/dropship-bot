@@ -1,37 +1,30 @@
-import random
-
 def generate_listing(product):
     name = product["name"]
-    price = product["amazon_price"]
-    profit = product["profit"]
+    niche = product.get("niche", "general")
+    recommended_price = product.get("recommended_price", product.get("amazon_price", 0))
+    profit = product.get("profit", 0)
+    score = product.get("score", 0)
+    risk = product.get("risk", "unknown")
 
-    # Generate title
-    title = f"{name} | High Quality & Fast Shipping"
+    # Title
+    title = f"{name} - Trending {niche.title()} Product"
 
     # Bullet points
     bullets = [
-        f"✅ Premium quality {name.lower()}",
-        f"🔥 High demand product in {product['niche']} niche",
-        f"💰 Estimated profit margin: ${profit}",
-        "🚚 Fast and reliable shipping",
-        "⭐ Trusted and trending product"
+        f"Designed for customers interested in {niche} products.",
+        "Selected using automated product scoring and demand analysis.",
+        f"Estimated profit: ${profit}.",
+        f"Product score: {score}.",
+        f"Risk level: {risk}."
     ]
 
     # Description
-    description = f"""
-Introducing our top-selling {name}!
-
-This product is currently trending in the {product['niche']} market and offers excellent value.
-
-✔ Affordable sourcing price
-✔ Strong resale potential
-✔ High customer demand
-
-Don't miss out on this winning product!
-"""
-
-    # Pricing strategy
-    recommended_price = round(price * random.uniform(1.05, 1.2), 2)
+    description = (
+        f"{name} is a high-potential product identified by the automation system. "
+        f"It falls under the {niche} niche and has been selected based on profit margins, "
+        f"trend analysis, competition level, and risk scoring. "
+        f"Ensure supplier reliability and delivery time before listing."
+    )
 
     return {
         "title": title,
