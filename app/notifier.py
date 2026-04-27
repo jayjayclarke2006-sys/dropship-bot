@@ -1,7 +1,8 @@
+import os
 import requests
 
-TELEGRAM_TOKEN = "8700111978:AAGTViZz3ie8zTpj_mV1AOe296BqIWyEvoY"
-CHAT_ID = "5717589829"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 
 def send_alert(product):
