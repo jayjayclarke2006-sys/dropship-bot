@@ -1,3 +1,7 @@
+import os
+
+print("DEBUG TOKEN:", os.getenv("TELEGRAM_BOT_TOKEN"))
+print("DEBUG CHAT:", os.getenv("TELEGRAM_CHAT_ID"))
 import requests
 import os
 
