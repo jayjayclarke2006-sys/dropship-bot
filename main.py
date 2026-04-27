@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from app.product_research import find_products
 from app.listing_generator import generate_listing
-from app.telegram_bot import send_telegram_message
+from app.telegram_bot import send_telegram_photo
 import time
 import threading
 
-# ✅ THIS MUST EXIST
 app = FastAPI()
 
 
@@ -24,7 +23,6 @@ def scan_products():
     }
 
 
-# 🔥 BOT LOOP
 def run_bot():
     while True:
         print("🔍 Scanning for products...")
@@ -34,36 +32,46 @@ def run_bot():
         if not products:
             print("❌ No good products found")
         else:
-            best = products[0]
-            print("🔥 BEST PRODUCT FOUND:", best)
+            top_products = products[:3]
 
-            listing = generate_listing(best)
-            print("📦 GENERATED LISTING:", listing)
+            print(f"🔥 TOP {len(top_products)} PRODUCTS FOUND")
 
-            # 🚀 SEND TO TELEGRAM
-            message = f"""
-🔥 BEST PRODUCT FOUND
+            for i, product in enumerate(top_products, 1):
+                listing = generate_listing(product)
 
-📦 {best['name']}
-💰 Profit: ${best['profit']}
-📊 Score: {best['score']}
-📈 Trend: {best['trend_score']}
-⚠️ Risk: {best['risk']}
+                caption = f"""
+🏆 <b>TOP PRODUCT #{i}</b>
 
-🛒 Price: ${best['amazon_price']}
+📦 <b>{product['name']}</b>
 
------------------------
+💰 Profit: ${product['profit']}
+🛒 Price: ${product['amazon_price']}
+📊 Score: {product['score']}
+📈 Trend: {product['trend_score']}
+⚠️ Risk: {product['risk'].upper()}
 
-📝 LISTING:
-{listing['title']}
+━━━━━━━━━━━━━━━
+🧠 <b>AI LISTING</b>
 
-{listing['description']}
+🏷 {listing['title']}
+
+• {listing['bullets'][0]}
+• {listing['bullets'][1]}
+• {listing['bullets'][2]}
+
+━━━━━━━━━━━━━━━
+🚀 Ready to sell
 """
-            send_telegram_message(message)
+
+                print(f"📤 Sending product #{i} to Telegram")
+
+                send_telegram_photo(
+                    product["image"],
+                    caption
+                )
 
         print("⏳ Waiting 10 minutes...\n")
         time.sleep(600)
 
 
-# ✅ START BACKGROUND BOT
 threading.Thread(target=run_bot).start()
