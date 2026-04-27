@@ -4,31 +4,37 @@ def generate_listing(product):
     recommended_price = product.get("recommended_price", product.get("amazon_price", 0))
     profit = product.get("profit", 0)
     score = product.get("score", 0)
-    risk = product.get("risk", "unknown")
+    trend_score = product.get("trend_score", 0)
 
-    # Title
-    title = f"{name} - Trending {niche.title()} Product"
+    # 🔥 SEO-style title (better for Amazon)
+    title = f"{name} for Everyday Use | High Quality {niche.title()} Product | Fast Shipping"
 
-    # Bullet points
+    # 🔥 Sales-focused bullet points
     bullets = [
-        f"Designed for customers interested in {niche} products.",
-        "Selected using automated product scoring and demand analysis.",
-        f"Estimated profit: ${profit}.",
-        f"Product score: {score}.",
-        f"Risk level: {risk}."
+        f"🔥 Trending {niche} product with strong demand",
+        f"💰 High resale potential with estimated profit of ${profit}",
+        "⚡ Designed for convenience, durability, and everyday use",
+        "🚚 Fast shipping and reliable quality",
+        "⭐ Perfect for customers looking for value and performance"
     ]
 
-    # Description
+    # 🔥 Conversion-focused description
     description = (
-        f"{name} is a high-potential product identified by the automation system. "
-        f"It falls under the {niche} niche and has been selected based on profit margins, "
-        f"trend analysis, competition level, and risk scoring. "
-        f"Ensure supplier reliability and delivery time before listing."
+        f"Introducing the {name}, one of the fastest-growing products in the {niche} niche.\n\n"
+        f"This product is currently gaining traction due to its combination of affordability, "
+        f"high demand, and strong resale margins.\n\n"
+        f"✔ Trending product with increasing demand\n"
+        f"✔ Ideal for reselling and dropshipping\n"
+        f"✔ Competitive pricing and strong profit margins\n\n"
+        f"Don't miss out on adding this high-potential product to your store."
     )
+
+    # 🔥 Pricing strategy (cleaned up)
+    final_price = round(recommended_price, 2)
 
     return {
         "title": title,
         "bullets": bullets,
         "description": description,
-        "recommended_price": recommended_price
+        "recommended_price": final_price
     }
