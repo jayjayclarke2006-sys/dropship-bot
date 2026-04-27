@@ -14,32 +14,38 @@ def get_trend_score(niche):
     return random.randint(4, 10)
 
 # -------------------------------
-# Scoring System
+# Improved Scoring System
 # -------------------------------
 def score_product(product, trend_score):
     score = 0
 
-    if product["profit"] > 20:
-        score += 4
+    # Profit strength
+    if product["profit"] > 25:
+        score += 5
+    elif product["profit"] > 15:
+        score += 3
     elif product["profit"] > 10:
-        score += 3
-
-    if 10 < product["amazon_price"] < 100:
         score += 2
 
-    if trend_score > 7:
+    # Sweet price range (conversion zone)
+    if 15 < product["amazon_price"] < 80:
         score += 3
-    elif trend_score > 5:
+
+    # Trend strength
+    if trend_score > 8:
+        score += 4
+    elif trend_score > 6:
         score += 2
 
+    # Demand simulation
     demand = random.randint(1, 10)
     if demand > 7:
-        score += 2
+        score += 3
 
     return score
 
 # -------------------------------
-# Main Function
+# Main Product Finder
 # -------------------------------
 def find_products():
     supplier_products = get_supplier_products()
