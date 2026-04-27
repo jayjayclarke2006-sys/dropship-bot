@@ -1,15 +1,15 @@
 import requests
 
 def get_supplier_products():
-    url = "https://fakestoreapi.com/products"
+    url = "https://dummyjson.com/products"
 
     try:
         response = requests.get(url)
-        data = response.json()
+        data = response.json()["products"]
 
         products = []
 
-        for item in data[:10]:  # limit to 10 products
+        for item in data[:15]:
             products.append({
                 "name": item["title"],
                 "supplier_price": float(item["price"]),
