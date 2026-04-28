@@ -2,20 +2,24 @@ import os
 import time
 import requests
 
-from app.product_research import find_products
-from app.listing_generator import generate_listing
-from app.supplier_connector import get_supplier_match
-from app.amazon_sp_api import submit_listing_to_amazon
+# 🔥 IMPORTANT: matches your current folder structure (app/app/)
+from app.app.product_research import find_products
+from app.app.listing_generator import generate_listing
+from app.app.supplier_connector import get_supplier_match
+from app.app.amazon_sp_api import submit_listing_to_amazon
+
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-print("🚀 AMAZON PREP BOT STARTING...")
+print("🚀 BOT STARTING...")
 
+
+# ---------------- TELEGRAM ---------------- #
 
 def send_message(text):
     if not TOKEN or not CHAT_ID:
-        print("Telegram not configured")
+        print("❌ Telegram not configured")
         print(text)
         return
 
@@ -27,33 +31,37 @@ def send_message(text):
         "parse_mode": "Markdown"
     }
 
-    res = requests.post(url, data=data)
-    print("Telegram response:", res.text)
+    try:
+        res = requests.post(url, data=data, timeout=10)
+        print("Telegram:", res.text)
+    except Exception as e:
+        print("Telegram error:", e)
 
+
+# ---------------- FORMAT MESSAGE ---------------- #
 
 def format_message(product, listing, supplier, amazon_result):
     return f"""
-🔥 *AUTO LISTING CANDIDATE*
+🔥 *AUTO PRODUCT FOUND*
 
 📦 *Product:* {product['name']}
 
 💰 *Amazon Price:* ${product.get('amazon_price', 'N/A')}
 🏷 *Supplier Cost:* ${supplier['total_cost']}
-📈 *Estimated Profit:* ${product.get('profit', 'N/A')}
+📈 *Profit:* ${product.get('profit', 'N/A')}
 📊 *Score:* {product.get('score', 'N/A')}
 ⚠️ *Risk:* {product.get('risk', 'unknown')}
 
-🛒 *Supplier Search:*
+🛒 *Supplier Link:*
 {supplier['supplier_url']}
 
 ━━━━━━━━━━━━━━━
-📝 *Generated Listing*
+📝 *Listing*
 
 *Title:*
 {listing['title']}
 
-*Price:*
-${listing['price']}
+*Price:* ${listing['price']}
 
 *Bullets:*
 • {listing['bullets'][0]}
@@ -62,18 +70,17 @@ ${listing['price']}
 • {listing['bullets'][3]}
 • {listing['bullets'][4]}
 
-*Description:*
-{listing['description']}
-
 ━━━━━━━━━━━━━━━
 🤖 *Amazon Status:*
 {amazon_result['reason']}
 """
 
 
+# ---------------- MAIN LOOP ---------------- #
+
 def run_bot():
     while True:
-        print("🔍 Finding products...")
+        print("🔍 Scanning for products...")
 
         try:
             products = find_products()
@@ -82,13 +89,11 @@ def run_bot():
                 send_message("⚠️ No strong products found this scan.")
             else:
                 for product in products[:3]:
+                    print("📦 Found:", product["name"])
+
                     supplier = get_supplier_match(product)
                     listing = generate_listing(product)
                     amazon_result = submit_listing_to_amazon(product, listing)
-
-                    print("📦 Product:", product["name"])
-                    print("📝 Listing:", listing["title"])
-                    print("🤖 Amazon:", amazon_result["reason"])
 
                     message = format_message(
                         product,
@@ -100,12 +105,14 @@ def run_bot():
                     send_message(message)
 
         except Exception as e:
-            print("ERROR:", e)
-            send_message(f"❌ Bot error: {e}")
+            print("❌ ERROR:", e)
+            send_message(f"❌ Bot crashed: {e}")
 
         print("⏳ Waiting 10 minutes...\n")
         time.sleep(600)
 
+
+# ---------------- START ---------------- #
 
 if __name__ == "__main__":
     run_bot()
