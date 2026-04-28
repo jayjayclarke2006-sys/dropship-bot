@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
+sent_products = set()
+
 print("🚀 BOT STARTING...")
 
 
@@ -21,6 +23,8 @@ def send_product(product):
 ⚠️ Risk: {product['risk']}
 
 🛒 {product['link']}
+
+🧠 {product['reason']}
 """
 
     data = {
@@ -32,50 +36,67 @@ def send_product(product):
     print("Telegram:", res.text)
 
 
-# ===== SCRAPE AMAZON =====
+# ===== REAL PRODUCT SCRAPER =====
 def get_products():
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
+    headers = {"User-Agent": "Mozilla/5.0"}
 
-    keywords = random.choice([
+    keywords = [
         "tiktok gadgets",
-        "cool gadgets",
+        "amazon best sellers electronics",
+        "cool tech gadgets",
         "smart home devices",
-        "fitness gadgets",
-        "tech accessories"
-    ])
+    ]
 
-    url = f"https://www.amazon.com/s?k={keywords.replace(' ', '+')}"
+    url = f"https://www.amazon.com/s?k={random.choice(keywords).replace(' ', '+')}"
     res = requests.get(url, headers=headers)
 
     soup = BeautifulSoup(res.text, "html.parser")
-
     items = soup.select(".s-result-item h2 a span")
 
     products = []
 
-    for item in items[:10]:
-        name = item.text
+    for item in items:
+        name = item.text.strip()
 
-        profit = round(random.uniform(15, 50), 2)
-        score = round(random.uniform(25, 45), 2)
+        if len(name) < 10 or name in sent_products:
+            continue
 
-        products.append({
+        # ===== SIMULATED REAL PRICING =====
+        selling_price = random.uniform(25, 80)
+        cost_price = selling_price * random.uniform(0.3, 0.6)
+        profit = round(selling_price - cost_price, 2)
+
+        score = round((profit * 0.6) + random.uniform(10, 20), 2)
+
+        # ===== SIMPLE TREND LOGIC =====
+        if any(x in name.lower() for x in ["led", "smart", "mini", "portable"]):
+            trend_boost = "🔥 Trending style product"
+            score += 5
+        else:
+            trend_boost = "📦 General product"
+
+        product = {
             "name": name,
             "profit": profit,
-            "score": score,
-            "risk": "low",
-            "link": f"https://www.amazon.com/s?k={name.replace(' ', '+')}"
-        })
+            "score": round(score, 2),
+            "risk": "low" if profit > 20 else "medium",
+            "link": f"https://www.amazon.com/s?k={name.replace(' ', '+')}",
+            "reason": trend_boost
+        }
 
-    return random.sample(products, 3)
+        products.append(product)
+        sent_products.add(name)
+
+        if len(products) == 3:
+            break
+
+    return products
 
 
 # ===== MAIN LOOP =====
 def run_bot():
     while True:
-        print("🔥 FETCHING REAL PRODUCTS...")
+        print("🔥 FINDING REAL PRODUCTS...")
 
         try:
             products = get_products()
