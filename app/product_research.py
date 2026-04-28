@@ -1,6 +1,10 @@
+import requests
+from bs4 import BeautifulSoup
 import random
+import re
 
 used_products = set()
+
 
 def calculate_score(profit, trend_score):
     return round((profit * 0.7) + (trend_score * 3), 2)
@@ -8,7 +12,6 @@ def calculate_score(profit, trend_score):
 
 def calculate_trend_score(name):
     keywords = ["mini", "smart", "portable", "wireless", "led", "usb", "pro", "max"]
-
     score = random.uniform(5, 10)
 
     for word in keywords:
@@ -18,47 +21,111 @@ def calculate_trend_score(name):
     return round(score, 2)
 
 
-def find_products():
-    base_products = [
-        "Mini Projector",
-        "Smart Watch",
-        "Wireless Earbuds",
-        "LED Strip Lights",
-        "Bluetooth Speaker",
-        "Portable Blender",
-        "Car Vacuum Cleaner",
-        "Gaming Headset",
-        "Phone Cooling Fan",
-        "Smart Ring",
-        "USB Mini Fan",
-        "Magnetic Charger",
-        "Desk LED Lamp",
-        "Portable Power Bank",
-        "Noise Cancelling Headphones"
+def extract_price(text):
+    match = re.search(r"\$([\d,]+\.?\d*)", text)
+    if match:
+        return float(match.group(1).replace(",", ""))
+    return None
+
+
+def scrape_amazon():
+    headers = {
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    keywords = [
+        "tiktok gadgets",
+        "cool gadgets",
+        "smart home devices",
+        "tech accessories",
+        "amazon best sellers gadgets"
     ]
 
-    # Avoid repeats
-    available = [p for p in base_products if p not in used_products]
-
-    if len(available) < 3:
-        used_products.clear()
-        available = base_products
-
-    selected = random.sample(available, 3)
+    search = random.choice(keywords)
+    url = f"https://www.amazon.com/s?k={search.replace(' ', '+')}"
 
     results = []
 
-    for name in selected:
-        used_products.add(name)
+    try:
+        res = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(res.text, "html.parser")
 
-        supplier_price = round(random.uniform(8, 30), 2)
-        amazon_price = round(supplier_price * random.uniform(2.2, 3.5), 2)
+        items = soup.select(".s-result-item")
+
+        for item in items:
+            title_tag = item.select_one("h2 a span")
+            price_whole = item.select_one(".a-price-whole")
+            price_fraction = item.select_one(".a-price-fraction")
+
+            if not title_tag or not price_whole:
+                continue
+
+            name = title_tag.text.strip()
+
+            if len(name) < 12 or name in used_products:
+                continue
+
+            price = float(price_whole.text.replace(",", ""))
+            if price_fraction:
+                price += float("0." + price_fraction.text)
+
+            # Skip cheap junk
+            if price < 15:
+                continue
+
+            used_products.add(name)
+
+            results.append({
+                "name": name,
+                "amazon_price": round(price, 2)
+            })
+
+            if len(results) >= 5:
+                break
+
+    except:
+        pass
+
+    return results
+
+
+def fallback_products():
+    return [
+        {"name": "Mini Projector", "amazon_price": 79.99},
+        {"name": "Smart Watch", "amazon_price": 49.99},
+        {"name": "Wireless Earbuds", "amazon_price": 29.99},
+        {"name": "Bluetooth Speaker", "amazon_price": 39.99},
+        {"name": "Portable Blender", "amazon_price": 34.99}
+    ]
+
+
+def estimate_supplier_price(amazon_price):
+    return round(amazon_price * random.uniform(0.25, 0.45), 2)
+
+
+def find_products():
+    scraped = scrape_amazon()
+
+    if len(scraped) < 3:
+        scraped = fallback_products()
+
+    selected = random.sample(scraped, 3)
+
+    results = []
+
+    for item in selected:
+        name = item["name"]
+        amazon_price = item["amazon_price"]
+
+        supplier_price = estimate_supplier_price(amazon_price)
         profit = round(amazon_price - supplier_price, 2)
 
         trend_score = calculate_trend_score(name)
         score = calculate_score(profit, trend_score)
 
-        risk = "low" if profit > 20 else "medium"
+        # Filter weak products
+        if profit < 12:
+            continue
 
         product = {
             "name": name,
@@ -68,11 +135,11 @@ def find_products():
             "trend_score": trend_score,
             "score": score,
             "niche": "tech",
-            "risk": risk,
-            "image": f"https://source.unsplash.com/400x400/?{name.replace(' ', '')}"
+            "risk": "low" if profit > 20 else "medium",
+            "image": f"https://source.unsplash.com/400x400/?{name.replace(' ', '')}",
+            "link": f"https://www.amazon.com/s?k={name.replace(' ', '+')}"
         }
 
         results.append(product)
 
-    # Sort best first
     return sorted(results, key=lambda x: x["score"], reverse=True)
