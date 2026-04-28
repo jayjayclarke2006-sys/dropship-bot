@@ -1,36 +1,45 @@
 def generate_listing(product):
     name = product["name"]
-    niche = product.get("niche", "general")
-    recommended_price = product.get("sell_price", product.get("amazon_price", 29.99))
+    niche = product.get("niche", "tech")
+    price = product.get("amazon_price", product.get("sell_price", 29.99))
     profit = product.get("profit", 0)
     score = product.get("score", 0)
-    risk = product.get("risk", "unknown")
+    risk = product.get("risk", "medium")
 
-    title = f"{name} - Trending {niche.title()} Product"
+    title = f"{name} - Trending {niche.title()} Product for Everyday Use"
 
     bullets = [
-        f"🔥 Trending in {niche} niche",
-        f"💰 Estimated profit: ${profit}",
-        f"📊 Product score: {score}",
-        f"⚠️ Risk level: {risk}",
-        "🚀 Fast shipping & high demand"
+        f"Trending {niche} product with strong customer demand",
+        f"Estimated profit potential: ${profit}",
+        f"Product score: {score}",
+        f"Risk level: {risk}",
+        "Ideal for online retail, gifting, and everyday use"
     ]
 
     description = f"""
-{name} is a high-potential product in the {niche} niche.
+{name} is a high-potential product selected by your automated product research system.
 
-This product has been selected using automated scoring based on profit, trends, and demand.
+This listing was generated based on:
+- Estimated profit
+- Trend score
+- Product demand
+- Risk level
+- Resale potential
 
-✔ Strong margins  
-✔ High demand  
-✔ Easy to sell  
-
-Perfect for reselling and scaling.
+Before uploading to Amazon, check:
+- Category restrictions
+- Brand/IP restrictions
+- Supplier delivery time
+- UPC/GTIN requirements
+- Amazon dropshipping policy
 """
+
+    keywords = f"{name}, {niche}, trending product, online shopping, gadget, gift"
 
     return {
         "title": title,
-        "price": recommended_price,
+        "price": round(price, 2),
         "bullets": bullets,
-        "description": description
+        "description": description.strip(),
+        "keywords": keywords
     }
