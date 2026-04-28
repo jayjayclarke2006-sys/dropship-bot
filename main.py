@@ -1,77 +1,44 @@
-from fastapi import FastAPI
 from app.product_research import find_products
-from app.listing_generator import generate_listing
-from app.telegram_bot import send_telegram_photo
+from app.telegram_bot import send_telegram_message
 import time
-import threading
-
-app = FastAPI()
-
-
-@app.get("/")
-def home():
-    return {"status": "running"}
-
-
-@app.get("/scan-products")
-def scan_products():
-    products = find_products()
-    return {
-        "status": "success",
-        "products_found": len(products),
-        "products": products
-    }
 
 
 def run_bot():
+    print("🚀 Bot started...")
+
     while True:
-        print("🔍 Scanning for products...")
+        try:
+            print("🔍 Scanning for products...")
 
-        products = find_products()
+            products = find_products()
 
-        if not products:
-            print("❌ No good products found")
-        else:
-            top_products = products[:3]
+            if not products:
+                print("❌ No products found")
+            else:
+                print("🔥 TOP 3 PRODUCTS FOUND")
 
-            print(f"🔥 TOP {len(top_products)} PRODUCTS FOUND")
+                top_products = products[:3]
 
-            for i, product in enumerate(top_products, 1):
-                listing = generate_listing(product)
+                for i, product in enumerate(top_products):
+                    print(f"📦 Sending product #{i+1}")
 
-                caption = f"""
-🏆 <b>TOP PRODUCT #{i}</b>
-
-📦 <b>{product['name']}</b>
+                    message = f"""
+🔥 {product['name']}
 
 💰 Profit: ${product['profit']}
-🛒 Price: ${product['amazon_price']}
 📊 Score: {product['score']}
-📈 Trend: {product['trend_score']}
-⚠️ Risk: {product['risk'].upper()}
-
-━━━━━━━━━━━━━━━
-🧠 <b>AI LISTING</b>
-
-🏷 {listing['title']}
-
-• {listing['bullets'][0]}
-• {listing['bullets'][1]}
-• {listing['bullets'][2]}
-
-━━━━━━━━━━━━━━━
-🚀 Ready to sell
+⚠️ Risk: {product['risk']}
 """
 
-                print(f"📤 Sending product #{i} to Telegram")
+                    send_telegram_message(message)
 
-                send_telegram_photo(
-                    product["image"],
-                    caption
-                )
+            print("⏳ Waiting 10 minutes...\n")
+            time.sleep(600)
 
-        print("⏳ Waiting 10 minutes...\n")
-        time.sleep(600)
+        except Exception as e:
+            print("❌ ERROR:", str(e))
+            time.sleep(60)
 
 
-threading.Thread(target=run_bot).start()
+if __name__ == "__main__":
+    run_bot()
