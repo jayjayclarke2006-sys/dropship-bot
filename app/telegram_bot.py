@@ -1,8 +1,8 @@
 import requests
 
 # 🔐 PUT YOUR REAL VALUES HERE
-TELEGRAM_TOKEN = "YOUR_TOKEN_HERE"
-CHAT_ID = "YOUR_CHAT_ID"
+TELEGRAM_TOKEN = "8700111978:AAFw0hdkSz8CCuTzECp_hMf_rLNbQVXfiVM"
+CHAT_ID = "5717589892"
 
 
 def send_telegram_message(text):
