@@ -1,35 +1,22 @@
 import requests
 
-TELEGRAM_TOKEN = "8700111978:AAHePxkgei_pvxoyTckQTkEaCf64GmnviH8"
-CHAT_ID = "5717589829"
+# 🔐 PUT YOUR REAL VALUES HERE
+TELEGRAM_TOKEN = "YOUR_TOKEN_HERE"
+CHAT_ID = "YOUR_CHAT_ID"
 
 
 def send_telegram_message(text):
-    print("🚀 Sending TEXT to Telegram...")
+    print("🚀 Sending to Telegram...")
 
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
     data = {
         "chat_id": CHAT_ID,
-        "text": text
+        "text": text,
+        "parse_mode": "Markdown",
+        "disable_web_page_preview": False
     }
 
     response = requests.post(url, data=data)
 
-    print("📩 TEXT response:", response.text)
-
-
-def send_telegram_photo(image_url, caption):
-    print("🚀 Sending PHOTO to Telegram...")
-
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendPhoto"
-
-    data = {
-        "chat_id": CHAT_ID,
-        "photo": image_url,
-        "caption": caption
-    }
-
-    response = requests.post(url, data=data)
-
-    print("📩 PHOTO response:", response.text)
+    print("📩 Telegram response:", response.text)
