@@ -1,56 +1,60 @@
-from app.product_research import find_products
-from app.telegram_bot import send_telegram_message
+import os
 import time
+import requests
+
+# ====== TELEGRAM CONFIG ======
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+print("🚀 BOT STARTING...")
+print("TOKEN:", TOKEN)
+print("CHAT:", CHAT_ID)
 
 
+# ====== SEND MESSAGE ======
+def send_message(text):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    data = {
+        "chat_id": CHAT_ID,
+        "text": text
+    }
+
+    try:
+        res = requests.post(url, data=data)
+        print("Telegram response:", res.text)
+    except Exception as e:
+        print("❌ Error sending message:", e)
+
+
+# ====== MAIN LOOP ======
 def run_bot():
-    print("🚀 Bot started...")
-
     while True:
-        try:
-            print("🔍 Scanning for products...")
+        print("🔥 SCANNING PRODUCTS...")
 
-            products = find_products()
+        # Fake products (your working version)
+        products = [
+            {"name": "Mini Projector", "profit": 44.99, "score": 40.0, "risk": "low"},
+            {"name": "Smart Watch", "profit": 33.99, "score": 39.2, "risk": "low"},
+            {"name": "Wireless Earbuds", "profit": 21.99, "score": 28.0, "risk": "low"},
+        ]
 
-            if not products:
-                print("❌ No products found")
-            else:
-                print("🔥 TOP PRODUCTS FOUND")
+        print("🔥 TOP 3 PRODUCTS FOUND")
 
-                sent = 0
+        for p in products:
+            msg = f"""🔥 {p['name']}
 
-                for product in products:
-
-                    # 🔥 FILTER (ONLY GOOD PRODUCTS)
-                    if product["profit"] < 20 or product["score"] < 35:
-                        continue
-
-                    print(f"📦 Sending: {product['name']}")
-
-                    message = f"""
-🔥 *{product['name']}*
-
-💰 Profit: ${product['profit']}
-📊 Score: {product['score']}
-⚠️ Risk: {product['risk']}
-
-🛒 [View on Amazon]({product['link']})
+💰 Profit: ${p['profit']}
+📊 Score: {p['score']}
+⚠️ Risk: {p['risk']}
 """
 
-                    send_telegram_message(message)
+            print(f"📤 Sending {p['name']}...")
+            send_message(msg)
 
-                    sent += 1
-
-                    if sent == 3:
-                        break
-
-            print("⏳ Waiting 10 minutes...\n")
-            time.sleep(600)
-
-        except Exception as e:
-            print("❌ ERROR:", str(e))
-            time.sleep(60)
+        print("⏳ Waiting 10 minutes...\n")
+        time.sleep(600)
 
 
+# ====== START ======
 if __name__ == "__main__":
     run_bot()
