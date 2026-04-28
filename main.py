@@ -15,22 +15,34 @@ def run_bot():
             if not products:
                 print("❌ No products found")
             else:
-                print("🔥 TOP 3 PRODUCTS FOUND")
+                print("🔥 TOP PRODUCTS FOUND")
 
-                top_products = products[:3]
+                sent = 0
 
-                for i, product in enumerate(top_products):
-                    print(f"📦 Sending product #{i+1}")
+                for product in products:
+
+                    # 🔥 FILTER (ONLY GOOD PRODUCTS)
+                    if product["profit"] < 20 or product["score"] < 35:
+                        continue
+
+                    print(f"📦 Sending: {product['name']}")
 
                     message = f"""
-🔥 {product['name']}
+🔥 *{product['name']}*
 
 💰 Profit: ${product['profit']}
 📊 Score: {product['score']}
 ⚠️ Risk: {product['risk']}
+
+🛒 [View on Amazon]({product['link']})
 """
 
                     send_telegram_message(message)
+
+                    sent += 1
+
+                    if sent == 3:
+                        break
 
             print("⏳ Waiting 10 minutes...\n")
             time.sleep(600)
