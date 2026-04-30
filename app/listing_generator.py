@@ -1,45 +1,30 @@
 def generate_listing(product):
     name = product["name"]
-    niche = product.get("niche", "tech")
-    price = product.get("amazon_price", product.get("sell_price", 29.99))
+    price = product.get("price", 19.99)
     profit = product.get("profit", 0)
-    score = product.get("score", 0)
-    risk = product.get("risk", "medium")
+    niche = product.get("niche", "general")
 
-    title = f"{name} - Trending {niche.title()} Product for Everyday Use"
+    title = f"{name} - Trending {niche.title()} Product"
 
     bullets = [
-        f"Trending {niche} product with strong customer demand",
-        f"Estimated profit potential: ${profit}",
-        f"Product score: {score}",
-        f"Risk level: {risk}",
-        "Ideal for online retail, gifting, and everyday use"
+        "High demand product with strong resale potential",
+        f"Estimated profit opportunity: ${profit}",
+        "Useful everyday item for online shoppers",
+        "Selected using automated product research",
+        "Check supplier delivery times before publishing"
     ]
 
-    description = f"""
-{name} is a high-potential product selected by your automated product research system.
-
-This listing was generated based on:
-- Estimated profit
-- Trend score
-- Product demand
-- Risk level
-- Resale potential
-
-Before uploading to Amazon, check:
-- Category restrictions
-- Brand/IP restrictions
-- Supplier delivery time
-- UPC/GTIN requirements
-- Amazon dropshipping policy
-"""
-
-    keywords = f"{name}, {niche}, trending product, online shopping, gadget, gift"
+    description = (
+        f"{name} is a potential selling opportunity selected by the automation system. "
+        f"This product was chosen based on supplier price, estimated resale value, and demand potential. "
+        f"Before publishing, review Amazon category rules, images, shipping time, and product compliance."
+    )
 
     return {
-        "title": title,
-        "price": round(price, 2),
+        "title": title[:190],
+        "price": price,
         "bullets": bullets,
-        "description": description.strip(),
-        "keywords": keywords
+        "description": description,
+        "brand": "Generic",
+        "product_type": "PRODUCT"
     }
