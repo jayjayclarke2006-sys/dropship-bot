@@ -21,7 +21,7 @@ def get_access_token():
     if data.get("result"):
         return data["data"]["accessToken"]
     else:
-        print("Auth failed:", data)
+        print("CJ auth failed:", data)
         return None
 
 
@@ -40,17 +40,16 @@ def fetch_cj_products():
     data = res.json()
 
     if not data.get("result"):
-        print("CJ API error:", data)
+        print("CJ error:", data)
         return []
 
     products = []
 
-    for item in data.get("data", [])[:5]:
+    for item in data.get("data", [])[:3]:
         products.append({
             "name": item.get("productName"),
-            "price": float(item.get("sellPrice", 10)),
-            "sales": item.get("sales", 0),
-            "link": item.get("productUrl")
+            "image": item.get("productImage"),
+            "price": float(item.get("sellPrice", 10))
         })
 
     return products
