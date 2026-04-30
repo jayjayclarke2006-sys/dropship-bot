@@ -1,16 +1,38 @@
-import random
+import requests
 
-def get_supplier_match(product):
-    amazon_price = product.get("amazon_price", 30)
+CJ_API_KEY = "YOUR_CJ_API_KEY"  # put in env later
 
-    supplier_price = round(amazon_price * random.uniform(0.28, 0.48), 2)
-    shipping_cost = round(random.uniform(2.99, 7.99), 2)
-    total_cost = round(supplier_price + shipping_cost, 2)
 
-    return {
-        "supplier_name": "AliExpress (estimated)",
-        "supplier_price": supplier_price,
-        "shipping_cost": shipping_cost,
-        "total_cost": total_cost,
-        "supplier_url": f"https://www.aliexpress.com/wholesale?SearchText={product['name'].replace(' ', '+')}"
+def fetch_cj_products():
+    url = "https://developers.cjdropshipping.com/api2.0/v1/product/list"
+
+    headers = {
+        "CJ-Access-Token": CJ_API_KEY
     }
+
+    params = {
+        "pageNum": 1,
+        "pageSize": 20
+    }
+
+    try:
+        res = requests.get(url, headers=headers, params=params)
+        data = res.json()
+
+        products = []
+
+        for item in data.get("data", {}).get("list", []):
+            cost = float(item.get("sellPrice", 0))
+
+            products.append({
+                "name": item.get("productName"),
+                "recommended_price": round(cost * 2.5, 2),
+                "profit": round(cost * 1.5, 2),
+                "trend_score": 80  # placeholder
+            })
+
+        return products
+
+    except Exception as e:
+        print("CJ API error:", e)
+        return []
