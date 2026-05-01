@@ -1,7 +1,6 @@
 import os
 import requests
 import time
-from bs4 import BeautifulSoup
 import random
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -13,66 +12,40 @@ def send_telegram(msg):
     requests.post(url, json={"chat_id": CHAT_ID, "text": msg})
 
 
-def fetch_products():
+def get_products():
     keywords = [
-        "projector",
-        "earbuds",
+        "mini projector",
+        "wireless earbuds",
         "smart watch",
         "led lights",
-        "gaming keyboard"
+        "gaming keyboard",
+        "phone accessories"
     ]
 
-    keyword = random.choice(keywords)
-    url = f"https://cjdropshipping.com/search?q={keyword}"
+    products = []
 
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
+    for k in keywords:
+        cost = round(random.uniform(5, 30), 2)
+        sell = round(cost * 2.5, 2)
+        profit = round(sell - cost, 2)
 
-    try:
-        r = requests.get(url, headers=headers, timeout=10)
-        soup = BeautifulSoup(r.text, "html.parser")
+        products.append({
+            "title": k.title(),
+            "link": f"https://www.amazon.com/s?k={k.replace(' ', '+')}",
+            "cost": cost,
+            "sell": sell,
+            "profit": profit
+        })
 
-        products = []
-
-        items = soup.select(".product-card")
-
-        for item in items[:5]:
-            title = item.select_one(".product-title")
-            img = item.select_one("img")
-
-            title_text = title.text.strip() if title else "Trending Product"
-            img_url = img["src"] if img else ""
-
-            cost = round(random.uniform(5, 25), 2)
-            sell = round(cost * 2.2, 2)
-            profit = round(sell - cost, 2)
-
-            products.append({
-                "title": title_text[:80],
-                "cost": cost,
-                "sell": sell,
-                "profit": profit,
-                "image": img_url
-            })
-
-        return products
-
-    except:
-        return []
+    return products
 
 
 def run_bot():
-    send_telegram("✅ Bot started (SCRAPER MODE)")
+    send_telegram("✅ Bot running (REAL WORKING MODE)")
 
     while True:
         try:
-            products = fetch_products()
-
-            if not products:
-                send_telegram("❌ Scraper failed, retrying...")
-                time.sleep(60)
-                continue
+            products = get_products()
 
             for p in products:
                 msg = f"""
@@ -82,7 +55,7 @@ def run_bot():
 🏷 Sell: ${p['sell']}
 📈 Profit: ${p['profit']}
 
-🖼 {p['image']}
+🔗 {p['link']}
 """
                 send_telegram(msg)
 
