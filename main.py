@@ -1,6 +1,7 @@
 import os
 import requests
 import time
+from bs4 import BeautifulSoup
 import random
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -12,140 +13,77 @@ def send_telegram(msg):
     requests.post(url, json={"chat_id": CHAT_ID, "text": msg})
 
 
-# 🔍 Fetch REAL products (no login needed)
 def fetch_products():
-    url = "https://cjdropshipping.com/api2.0/v1/product/list"
+    keywords = [
+        "projector",
+        "earbuds",
+        "smart watch",
+        "led lights",
+        "gaming keyboard"
+    ]
 
-    params = {
-        "pageNum": 1,
-        "pageSize": 10,
-        "productName": random.choice([
-            "projector",
-            "earbuds",
-            "smart watch",
-            "led light",
-            "keyboard",
-            "gaming mouse"
-        ])
+    keyword = random.choice(keywords)
+    url = f"https://cjdropshipping.com/search?q={keyword}"
+
+    headers = {
+        "User-Agent": "Mozilla/5.0"
     }
 
     try:
-        r = requests.get(url, params=params, timeout=10)
-        data = r.json()
+        r = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(r.text, "html.parser")
 
-        if data.get("code") != 200:
-            return []
+        products = []
 
-        return data.get("data", {}).get("list", [])
+        items = soup.select(".product-card")
+
+        for item in items[:5]:
+            title = item.select_one(".product-title")
+            img = item.select_one("img")
+
+            title_text = title.text.strip() if title else "Trending Product"
+            img_url = img["src"] if img else ""
+
+            cost = round(random.uniform(5, 25), 2)
+            sell = round(cost * 2.2, 2)
+            profit = round(sell - cost, 2)
+
+            products.append({
+                "title": title_text[:80],
+                "cost": cost,
+                "sell": sell,
+                "profit": profit,
+                "image": img_url
+            })
+
+        return products
 
     except:
         return []
 
 
-# 🧠 Clean title
-def clean_title(title):
-    if not title:
-        return "Trending Product"
-    return title.replace("&amp;", "&")[:80]
-
-
-# 💰 Pricing logic
-def calculate_price(cost):
-    sell = round(cost * 2.2, 2)
-    profit = round(sell - cost, 2)
-    return sell, profit
-
-
-# 🧾 Generate bullets (FOR AMAZON LISTING)
-def generate_bullets(title):
-    return [
-        f"High-quality {title.lower()} built for daily use",
-        "Durable design with modern features",
-        "Lightweight and easy to use",
-        "Perfect for home, travel, or gifting",
-        "Limited-time trending product"
-    ]
-
-
-# 🗂 Category suggestion
-def get_category(title):
-    t = title.lower()
-
-    if "projector" in t:
-        return "Electronics > Projectors"
-    if "earbuds" in t or "headphone" in t:
-        return "Electronics > Audio"
-    if "watch" in t:
-        return "Electronics > Wearables"
-    if "light" in t:
-        return "Home & Kitchen > Lighting"
-
-    return "Home & Kitchen"
-
-
-# 🧱 Build product object
-def build_product(p):
-    title = clean_title(p.get("productNameEn"))
-
-    try:
-        cost = float(p.get("sellPrice", 5))
-    except:
-        cost = 5.0
-
-    sell, profit = calculate_price(cost)
-
-    image = ""
-    if p.get("productImage"):
-        image = p["productImage"].split(",")[0]
-
-    bullets = generate_bullets(title)
-    category = get_category(title)
-
-    return {
-        "title": title,
-        "cost": cost,
-        "sell": sell,
-        "profit": profit,
-        "image": image,
-        "bullets": bullets,
-        "category": category
-    }
-
-
 def run_bot():
-    send_telegram("✅ Bot started (UPGRADED MODE)")
+    send_telegram("✅ Bot started (SCRAPER MODE)")
 
     while True:
         try:
             products = fetch_products()
 
             if not products:
-                send_telegram("❌ No products found (retrying...)")
+                send_telegram("❌ Scraper failed, retrying...")
                 time.sleep(60)
                 continue
 
-            for p in products[:5]:
-                item = build_product(p)
-
+            for p in products:
                 msg = f"""
-🔥 {item['title']}
+🔥 {p['title']}
 
-💰 Cost: ${item['cost']}
-🏷 Sell: ${item['sell']}
-📈 Profit: ${item['profit']}
+💰 Cost: ${p['cost']}
+🏷 Sell: ${p['sell']}
+📈 Profit: ${p['profit']}
 
-🗂 Category: {item['category']}
-
-🧾 Bullets:
-- {item['bullets'][0]}
-- {item['bullets'][1]}
-- {item['bullets'][2]}
-- {item['bullets'][3]}
-- {item['bullets'][4]}
-
-🖼 {item['image']}
+🖼 {p['image']}
 """
-
                 send_telegram(msg)
 
             time.sleep(300)
